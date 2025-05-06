@@ -4,6 +4,8 @@ using UnityStandardAssets.CrossPlatformInput;
 using UnityStandardAssets.Utility;
 using Random = UnityEngine.Random;
 
+using UnityEngine.UI;
+
 namespace UnityStandardAssets.Characters.FirstPerson
 {
     [RequireComponent(typeof (CharacterController))]
@@ -27,7 +29,9 @@ namespace UnityStandardAssets.Characters.FirstPerson
         [SerializeField] private AudioClip[] m_FootstepSounds;    // an array of footstep sounds that will be randomly selected from.
         [SerializeField] private AudioClip m_JumpSound;           // the sound played when character leaves the ground.
         [SerializeField] private AudioClip m_LandSound;           // the sound played when character touches back on ground.
-
+        public Text countText;
+	    public Text winText;
+        private int count;
         private Camera m_Camera;
         private bool m_Jump;
         private float m_YRotation;
@@ -42,6 +46,8 @@ namespace UnityStandardAssets.Characters.FirstPerson
         private bool m_Jumping;
         private AudioSource m_AudioSource;
 
+    
+
         // Use this for initialization
         private void Start()
         {
@@ -55,6 +61,9 @@ namespace UnityStandardAssets.Characters.FirstPerson
             m_Jumping = false;
             m_AudioSource = GetComponent<AudioSource>();
 			m_MouseLook.Init(transform , m_Camera.transform);
+            count = 0;
+            SetCountText();
+            winText.text = "";
         }
 
 
@@ -254,6 +263,36 @@ namespace UnityStandardAssets.Characters.FirstPerson
                 return;
             }
             body.AddForceAtPosition(m_CharacterController.velocity*0.1f, hit.point, ForceMode.Impulse);
+        }
+            void OnTriggerEnter(Collider other) 
+        {
+            // ..and if the game object we intersect has the tag 'Pick Up' assigned to it..
+            if (other.gameObject.CompareTag ("Pick Up"))
+            {
+                // Make the other game object (the pick up) inactive, to make it disappear
+                other.gameObject.SetActive (false);
+
+                // Add one to the score variable 'count'
+                count = count + 1;
+
+                // Run the 'SetCountText()' function (see below)
+                SetCountText ();
+            }
+        }
+
+        // Create a standalone function that can update the 'countText' UI and check if the required amount to win has been achieved
+        void SetCountText()
+        {
+            // Update the text field of our 'countText' variable
+            countText.text = "Quota: " + count.ToString () + "/1";
+
+            // Check if our 'count' is equal to or exceeded 12
+            if (count >= 1) 
+            {
+                // Set the text value of our 'winText'
+                winText.text = "You Met Quota! Touch the basket to win!";
+                Destroy(winText.gameObject, 2f);
+            }
         }
     }
 }
