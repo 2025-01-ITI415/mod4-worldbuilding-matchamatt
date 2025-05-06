@@ -31,6 +31,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
         [SerializeField] private AudioClip m_LandSound;           // the sound played when character touches back on ground.
         public Text countText;
 	    public Text winText;
+        public Text winScreenText;
         private int count;
         private Camera m_Camera;
         private bool m_Jump;
@@ -46,6 +47,10 @@ namespace UnityStandardAssets.Characters.FirstPerson
         private bool m_Jumping;
         private AudioSource m_AudioSource;
 
+        public float pushPower = 2.0f;
+         public BoxCollider barrierCollider;
+         public MeshCollider barrierMeshCollider;
+         public MonoBehaviour CountdownTimer;
     
 
         // Use this for initialization
@@ -64,6 +69,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
             count = 0;
             SetCountText();
             winText.text = "";
+            winScreenText.text = "";
         }
 
 
@@ -104,7 +110,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
         private void FixedUpdate()
         {
             float speed;
-            GetInput(out speed);
+             GetInput(out speed);
             // always move along the camera forward as it is the direction that it being aimed at
             Vector3 desiredMove = transform.forward*m_Input.y + transform.right*m_Input.x;
 
@@ -278,20 +284,30 @@ namespace UnityStandardAssets.Characters.FirstPerson
                 // Run the 'SetCountText()' function (see below)
                 SetCountText ();
             }
+            if (other.gameObject.CompareTag("Door") && count >= 10)
+            {
+                winScreenText.text = "YOU ARE FREE !!!";
+                CountdownTimer.enabled = false;
+                if (barrierCollider != null){
+                    barrierCollider.enabled = false;
+                 }
+                if (barrierMeshCollider != null)
+                     barrierMeshCollider.enabled = false;
+                }
         }
 
         // Create a standalone function that can update the 'countText' UI and check if the required amount to win has been achieved
         void SetCountText()
         {
             // Update the text field of our 'countText' variable
-            countText.text = "Quota: " + count.ToString () + "/1";
+            countText.text = "Collect All Keys Before Timer Runs Out!   " + count.ToString () + "/10";
 
             // Check if our 'count' is equal to or exceeded 12
-            if (count >= 1) 
+            if (count >= 10)
             {
                 // Set the text value of our 'winText'
-                winText.text = "You Met Quota! Touch the basket to win!";
-                Destroy(winText.gameObject, 2f);
+                winText.text = "Escape through the front door!";
+                Destroy(winText.gameObject, 10f);
             }
         }
     }
